@@ -9,15 +9,6 @@ import pandas as pd
 import numpy as np
 import random
 
-#== Parameters =======================================================================
-BLUR = 21
-CANNY_THRESH_1 = 10
-CANNY_THRESH_2 = 200
-MASK_DILATE_ITER = 10
-MASK_ERODE_ITER = 10
-MASK_COLOR = (0.0,0.0,1.0) # In BGR format
-
-
 
 
 def main(args):
@@ -25,13 +16,12 @@ def main(args):
     input_background = args.input_background
     output_folder = args.output_folder
     folder_for_testing = './testing_images'
+    folder_for_validating = './validating_images'
 
-    directory = os.path.dirname(output_folder)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    directory = os.path.dirname(folder_for_testing)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    if not os.path.exists(folder_for_testing):
+        os.makedirs(folder_for_testing)
 
     names_background = []
     background_len = 0
@@ -42,8 +32,10 @@ def main(args):
     # iterate through the folder with objects
     num_img = 0
     # iterate through different classes of objects
+
     for id_obj in range(len(input_objects)):
         for filename in os.listdir(input_objects[id_obj]):
+            break
             print(filename)
             object_img = cv2.imread(input_objects[id_obj] + '/' + filename)
             object_height, object_width, _ = object_img.shape
@@ -84,12 +76,16 @@ def main(args):
             f.write(output_line)
             f.close()
             num_img += 1
-
+    num_img = 240
+    id_obj = 1
     print('generate testing images')
     testing_num = 0
     for id_obj in range(len(input_objects)):
         for filename in os.listdir(input_objects[id_obj]):
-            if testing_num >= 0.2 * len(input_objects[0]):
+            print(filename)
+            print(0.2 * (num_img // (id_obj + 1)))
+            if testing_num >= 0.2 * (num_img // (id_obj + 1)):
+                print(testing_num)
                 break
             object_img = cv2.imread(input_objects[id_obj] + '/' + filename)
             object_height, object_width, _ = object_img.shape
