@@ -9,11 +9,29 @@ import pandas as pd
 import numpy as np
 import random
 
+#== Parameters =======================================================================
+BLUR = 21
+CANNY_THRESH_1 = 10
+CANNY_THRESH_2 = 200
+MASK_DILATE_ITER = 10
+MASK_ERODE_ITER = 10
+MASK_COLOR = (0.0,0.0,1.0) # In BGR format
+
+
+
 
 def main(args):
     input_objects = args.input_objects
     input_background = args.input_background
     output_folder = args.output_folder
+    folder_for_testing = './testing_images'
+
+    directory = os.path.dirname(output_folder)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    directory = os.path.dirname(folder_for_testing)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     names_background = []
     background_len = 0
@@ -66,6 +84,53 @@ def main(args):
             f.write(output_line)
             f.close()
             num_img += 1
+
+    print('generate testing images')
+    testing_num = 0
+    for id_obj in range(len(input_objects)):
+        for filename in os.listdir(input_objects[id_obj]):
+            if testing_num >= 0.2 * len(input_objects[0]):
+                break
+            object_img = cv2.imread(input_objects[id_obj] + '/' + filename)
+            object_height, object_width, _ = object_img.shape
+            id_back = random.randint(1, background_len - 1)
+            background_img = cv2.imread(input_background + '/' + back_images.loc[id_back, 'name_file'])
+            #            print(back_images.loc[id_back, 'name_file'])
+            back_height, back_width, _ = background_img.shape
+            #            print('back_width ', back_width)
+            # increase the size of background to be bigger than object size
+            scale_width = object_width / back_width
+            scale_height = object_height / back_height
+            imgScale = max(scale_width, scale_height) * random.randint(3, 8)
+            newX, newY = background_img.shape[1] * imgScale, background_img.shape[0] * imgScale
+            background_img = cv2.resize(background_img, (int(newX), int(newY)))
+            # post the image randomly into this background image
+            back_height, back_width, _ = background_img.shape
+            #            print('back_width ', back_width)
+            min_x = object_width // 2 + 1
+            #            print('min_x, ', min_x)
+            max_x = back_width - (object_width // 2 + 1)
+            #            print('max_x, ', max_x)
+            min_y = object_height // 2 + 1
+            max_y = back_height - (object_height // 2 + 1)
+            x_center = random.randint(min_x, max_x)
+            y_center = random.randint(min_y, max_y)
+            x_start = x_center - object_width // 2
+            y_start = y_center - object_height // 2
+            background_img[y_start:y_start + object_height, x_start:x_start + object_width] = object_img
+            cv2.imwrite(folder_for_testing + '/' + str(testing_num) + '.jpg', background_img)
+            # save text files to the same folder with the same name
+            x_yolo = x_center / back_width
+            y_yolo = y_center / back_height
+            width_yolo = object_width / back_width
+            height_yolo = object_height / back_height
+            output_line = str(id_obj) + ' ' + str(x_yolo) + ' ' + str(y_yolo) + ' ' + str(width_yolo) + ' ' + str(
+                height_yolo)
+            f = open(folder_for_testing + '/' + str(testing_num) + '.txt', "w+")
+            f.write(output_line)
+            f.close()
+
+            testing_num += 1
     print('done')
 
 if __name__ == '__main__':
