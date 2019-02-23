@@ -21,22 +21,34 @@ def main(args):
         names_background.append(filename)
         background_len += 1
     back_images = pd.DataFrame(np.array(names_background), columns=['name_file'])
-
     # iterate through the folder with objects
     num_img = 0
     # iterate through different classes of objects
-    print(len(input_objects))
-    print(input_objects)
     for i in range(len(input_objects)):
         for filename in os.listdir(input_objects[i]):
+            print(filename)
             object_img = cv2.imread(input_objects[i] + '/' + filename)
-            id_back = random.randint(1, background_len)
+            object_height, object_width, _ = object_img.shape
+            id_back = random.randint(1, background_len-1)
             background_img = cv2.imread(input_background + '/' + back_images.loc[id_back, 'name_file'])
+            print(back_images.loc[id_back, 'name_file'])
+            back_height, back_width, _ = background_img.shape
+            print('back_width ', back_width)
+            # increase the size of background to be bigger than object size
+            scale_width = object_width / back_width
+            scale_height = object_height / back_height
+            imgScale = max(scale_width, scale_height) * random.randint(3, 8)
+            newX, newY = background_img.shape[1] * imgScale, background_img.shape[0] * imgScale
+            background_img = cv2.resize(background_img, (int(newX), int(newY)))
             # post the image randomly into this background image
             back_height, back_width, _ = background_img.shape
-            object_height, object_width, _ = object_img.shape
+
+
+            print('back_width ', back_width)
             min_x = object_width // 2 + 1
+            print('min_x, ', min_x)
             max_x = back_width - (object_width // 2 + 1)
+            print('max_x, ', max_x)
             min_y = object_height // 2 + 1
             max_y = back_height - (object_height // 2 + 1)
             x_center = random.randint(min_x, max_x)
@@ -61,7 +73,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_objects', nargs='+', type=str, default='./input_objects_1 ./input_objects_2', help='')
+    parser.add_argument('--input_objects', nargs='+', type=str, default='./objects_1 ./objects_2', help='')
     parser.add_argument('--input_background', type=str, default='./input_background', help='')
     parser.add_argument('--output_folder', type=str, default='./output_folder', help='')
 
