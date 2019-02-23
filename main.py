@@ -24,16 +24,16 @@ def main(args):
     # iterate through the folder with objects
     num_img = 0
     # iterate through different classes of objects
-    for i in range(len(input_objects)):
-        for filename in os.listdir(input_objects[i]):
+    for id_obj in range(len(input_objects)):
+        for filename in os.listdir(input_objects[id_obj]):
             print(filename)
-            object_img = cv2.imread(input_objects[i] + '/' + filename)
+            object_img = cv2.imread(input_objects[id_obj] + '/' + filename)
             object_height, object_width, _ = object_img.shape
             id_back = random.randint(1, background_len-1)
             background_img = cv2.imread(input_background + '/' + back_images.loc[id_back, 'name_file'])
-            print(back_images.loc[id_back, 'name_file'])
+#            print(back_images.loc[id_back, 'name_file'])
             back_height, back_width, _ = background_img.shape
-            print('back_width ', back_width)
+#            print('back_width ', back_width)
             # increase the size of background to be bigger than object size
             scale_width = object_width / back_width
             scale_height = object_height / back_height
@@ -42,13 +42,11 @@ def main(args):
             background_img = cv2.resize(background_img, (int(newX), int(newY)))
             # post the image randomly into this background image
             back_height, back_width, _ = background_img.shape
-
-
-            print('back_width ', back_width)
+#            print('back_width ', back_width)
             min_x = object_width // 2 + 1
-            print('min_x, ', min_x)
+#            print('min_x, ', min_x)
             max_x = back_width - (object_width // 2 + 1)
-            print('max_x, ', max_x)
+#            print('max_x, ', max_x)
             min_y = object_height // 2 + 1
             max_y = back_height - (object_height // 2 + 1)
             x_center = random.randint(min_x, max_x)
@@ -62,14 +60,13 @@ def main(args):
             y_yolo = y_center / back_height
             width_yolo = object_width / back_width
             height_yolo = object_height / back_height
-            class_id = 0
-            output_line = str(class_id) + ' ' + str(x_yolo) + ' ' + str(y_yolo) + ' ' + str(width_yolo) + ' ' + str(
+            output_line = str(id_obj) + ' ' + str(x_yolo) + ' ' + str(y_yolo) + ' ' + str(width_yolo) + ' ' + str(
                 height_yolo)
             f = open(output_folder + '/' + str(num_img) + '.txt', "w+")
             f.write(output_line)
             f.close()
             num_img += 1
-
+    print('done')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
