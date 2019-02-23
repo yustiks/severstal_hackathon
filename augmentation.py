@@ -12,6 +12,14 @@ def main(args):
             img = Image.open(input_objects[i] + '/' + filename)
             # converted to have an alpha layer
             im2 = img.convert('RGBA')
+            #change w,h of iamge
+            k = 0
+            for k < 5:
+                resizex = random.uniform(0.3, 2)
+                resizey =random.uniform(0.3, 2)
+                im2 = cv2.resize(im2, (0,0), fx=resizex, fy=resizey)
+                cv2.imwrite(output_objects[i] + '/' + k + filename)
+                k += 1
             # rotated image
             for angle in np.arange(0, 360, 15):
                 rot = im2.rotate(angle, expand=1)
