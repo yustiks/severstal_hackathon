@@ -1,0 +1,5 @@
+classes = 2
+train  = training.txt
+valid  = testing.txt
+names = obj.names
+backup = backup/ 
