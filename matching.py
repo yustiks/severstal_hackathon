@@ -19,13 +19,32 @@ def normalize(img):
 
 def generate_patches(img1, img2):
     height, width = img1.shape
+    sum_average = 0
+    num_patches = 0
     for x1 in range(0, width-step-1, step):
         for y1 in range(0, height-step-1, step):
             y2 = y1 + step
             x2 = x1 + step
             sum1 = int(np.sum(img1[y1:y2, x1:x2]))
             sum2 = int(np.sum(img2[y1:y2, x1:x2]))
-            print(sum1 - sum2)
+            sum_average += abs(sum1 - sum2)
+            num_patches += 1
+    sum_average = sum_average/num_patches
+    list_of_predicted_patches = []
+    for x1 in range(0, width-step-1, step):
+        for y1 in range(0, height-step-1, step):
+            y2 = y1 + step
+            x2 = x1 + step
+            sum1 = int(np.sum(img1[y1:y2, x1:x2]))
+            sum2 = int(np.sum(img2[y1:y2, x1:x2]))
+            if abs(sum1+sum2) > sum_average:
+                list_of_predicted_patches.append(x1, y1)
+    return list_of_predicted_patches
+
+
+def draw_patches(list_of_patches):
+    for i in range(len(list_of_patches)):
+
 
 def main(args):
     file1 = args.file1
@@ -35,7 +54,8 @@ def main(args):
     img1 = normalize(img1)
     img2 = normalize(img2)
 
-    generate_patches(img1, img2)
+    list_of_patches = generate_patches(img1, img2)
+    draw_patches(list_of_patches)
     return 0
 
 if __name__ == '__main__':
