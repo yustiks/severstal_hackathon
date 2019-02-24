@@ -17,6 +17,7 @@ def main(args):
     output_folder = args.output_folder
     folder_for_testing = './testing_images'
     folder_for_validating = './validating_images'
+    line_text = []
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -68,16 +69,17 @@ def main(args):
             f = open(output_folder + '/' + str(num_img) + '.txt', "w+")
             f.write(output_line)
             f.close()
+            line_text.append('./data/obj/'+str(num_img) + '.jpg'+'\n')
             num_img += 1
-    num_img = 240
-    id_obj = 1
+    f = open('training.txt', "w+")
+    f.writelines(line_text)
+    f.close()
+    line_text = []
     print('generate testing images')
     testing_num = 0
     for id_obj in range(len(input_objects)):
         for filename in os.listdir(input_objects[id_obj]):
-            print(filename)
-            print(0.2 * (num_img // (id_obj + 1)))
-            if testing_num >= 0.2 * (num_img // (id_obj + 1)):
+            if testing_num >= (0.2 * 2**id_obj) * (num_img // (len(input_objects))):
                 print(testing_num)
                 break
             object_img = cv2.imread(input_objects[id_obj] + '/' + filename)
@@ -107,7 +109,7 @@ def main(args):
             x_start = x_center - object_width // 2
             y_start = y_center - object_height // 2
             background_img[y_start:y_start + object_height, x_start:x_start + object_width] = object_img
-            cv2.imwrite(folder_for_testing + '/' + str(testing_num) + '.jpg', background_img)
+            cv2.imwrite(output_folder + '/' + str(testing_num + num_img) + '.jpg', background_img)
             # save text files to the same folder with the same name
             x_yolo = x_center / back_width
             y_yolo = y_center / back_height
@@ -115,11 +117,15 @@ def main(args):
             height_yolo = object_height / back_height
             output_line = str(id_obj) + ' ' + str(x_yolo) + ' ' + str(y_yolo) + ' ' + str(width_yolo) + ' ' + str(
                 height_yolo)
-            f = open(folder_for_testing + '/' + str(testing_num) + '.txt', "w+")
+            f = open(output_folder + '/' + str(testing_num + num_img) + '.txt', "w+")
             f.write(output_line)
             f.close()
+            line_text.append('./data/obj/'+str(testing_num + num_img) + '.jpg'+'\n')
 
             testing_num += 1
+    f = open('testing.txt', "w+")
+    f.writelines(line_text)
+    f.close()
     print('done')
 
 if __name__ == '__main__':
